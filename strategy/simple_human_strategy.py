@@ -39,13 +39,11 @@ class SimpleHumanStrategy(Strategy):
             possible_moves: dict[str, list[MoveAction]], 
             game_state: GameState
             ) -> list[MoveAction]:
-        
         choices = []
 
         for [character_id, moves] in possible_moves.items():
             if len(moves) == 0:  # No choices... Next!
                 continue
-
             pos = game_state.characters[character_id].position  # position of the human
             closest_zombie_pos = pos  # default position is zombie's pos
             closest_zombie_distance = 1234  # large number, map isn't big enough to reach this distance
@@ -55,10 +53,10 @@ class SimpleHumanStrategy(Strategy):
                 if not c.is_zombie:
                     continue  # Fellow humans are frens :D, ignore them
 
-                distance = abs(c.position.x - pos.x) + abs(c.position.y - pos.y)  # calculate manhattan distance between human and zombie
-                if distance < closest_zombie_distance:  # If distance is closer than current closest, replace it!
-                    closest_zombie_pos = c.position
-                    closest_zombie_distance = distance
+                # distance = abs(c.position.x - pos.x) + abs(c.position.y - pos.y)  # calculate manhattan distance between human and zombie
+                # if distance < closest_zombie_distance:  # If distance is closer than current closest, replace it!
+                #     closest_zombie_pos = c.position
+                #     closest_zombie_distance = distance
 
             # Move as far away from the zombie as possible
             move_distance = 69420  # Distance between the move action's destination and the closest zombie
@@ -108,9 +106,23 @@ class SimpleHumanStrategy(Strategy):
                         if distance < move_distance:  # If distance is further, that's our new choice!
                             move_distance = distance
                             move_choice = m
-                elif (game_state.turn > 33) and (game_state.turn < 99):
+                elif (game_state.turn > 33) and (game_state.turn < 41):
                     for m in moves:
-                        distance = abs(m.destination.x - 25) + abs(m.destination.y - 99)  # calculate manhattan distance
+                        distance = abs(m.destination.x - 25) + abs(m.destination.y - 82)  # calculate manhattan distance
+
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
+                elif game_state.turn == 42:
+                    for m in moves:
+                        distance = abs(m.destination.x - 28) + abs(m.destination.y - 83)  # calculate manhattan distance
+
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
+                elif game_state.turn > 43:
+                    for m in moves:
+                        distance = abs(m.destination.x - 45) + abs(m.destination.y - 99)  # calculate manhattan distance
 
                         if distance < move_distance:  # If distance is further, that's our new choice!
                             move_distance = distance
@@ -126,7 +138,7 @@ class SimpleHumanStrategy(Strategy):
         choices = []
 
         for [character_id, attacks] in possible_attacks.items():
-            if len(attacks) == 0:  # No choices... Next!
+            if len(attacks) == 0 or game_state.characters[character_id].is_zombie == False:  # No choices... Next!
                 continue
 
             pos = game_state.characters[character_id].position  # position of the human
@@ -144,8 +156,7 @@ class SimpleHumanStrategy(Strategy):
                         closest_zombie = a
                         closest_zombie_distance = distance
 
-            if closest_zombie:  # Attack the closest zombie, if there is one
-                choices.append(closest_zombie)
+            choices.append(closest_zombie)
 
         return choices
 
@@ -183,6 +194,21 @@ class SimpleHumanStrategy(Strategy):
                                     abs((a.positional_target.y - game_state.characters[character_id].position.y)+1))
 
                         if ((distance < bigdist) and not(a.positional_target in prevtar) and
+                                (a.positional_target.y < game_state.characters[character_id].position.y)):
+                            bigdist = distance
+                            target = a
+                            targetloc = a.positional_target
+                    choices.append(target)
+                    prevtar.append(targetloc)
+                elif game_state.turn == 22:
+                    bigdist = 999
+                    distance = 0
+                    for a in abilities:
+                        distance = (abs(a.positional_target.x - game_state.characters[character_id].position.x) +
+                                    abs((a.positional_target.y - game_state.characters[
+                                        character_id].position.y) + 1))
+
+                        if ((distance < bigdist) and not (a.positional_target in prevtar) and
                                 (a.positional_target.y < game_state.characters[character_id].position.y)):
                             bigdist = distance
                             target = a
