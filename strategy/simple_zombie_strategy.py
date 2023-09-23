@@ -82,6 +82,7 @@ class SimpleZombieStrategy(Strategy):
             ) -> list[AttackAction]:
 
         choices = []
+        human_targets_already_chosen = []
 
         for [character_id, attacks] in possible_attacks.items():
             if len(attacks) == 0:  # No choices... Next!
@@ -91,11 +92,13 @@ class SimpleZombieStrategy(Strategy):
 
             # Gather list of humans in range
             for a in attacks:
-                if a.type is AttackActionType.CHARACTER:
+                if a.type is AttackActionType.CHARACTER and not(a in human_targets_already_chosen):
                     humans.append(a)
 
             if humans:  # Attack a random human in range
-                choices.append(random.choice(humans))
+                human_to_attack = random.choice(humans)
+                choices.append(human_to_attack)
+                human_targets_already_chosen.append(human_to_attack)
             else:  # No humans? Shame. The targets in range must be terrain. May as well attack one.
                 choices.append(random.choice(attacks))
 
