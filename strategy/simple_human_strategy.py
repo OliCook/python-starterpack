@@ -155,7 +155,7 @@ class SimpleHumanStrategy(Strategy):
             game_state: GameState
             ) -> list[AbilityAction]:
         choices = []
-
+        prevtar = []
         for [character_id, abilities] in possible_abilities.items():
             if len(abilities) == 0:  # No choices? Next!
                 continue
@@ -165,6 +165,7 @@ class SimpleHumanStrategy(Strategy):
                 least_health = 999  # The health of the human being targeted
 
                 for a in abilities:
+                    # print(a)
                     health = game_state.characters[a.character_id_target].health  # Health of human in question
 
                     if health < least_health:  # If they have less health, they are the new patient!
@@ -173,17 +174,35 @@ class SimpleHumanStrategy(Strategy):
 
                 if human_target:  # Give the human a cookie
                     choices.append(human_target)
-            # if game_state.characters[character_id].class_type == CharacterClassType.BUILDER:
-            #     if game_state.turn == 8:
-            #         bigdist = 999
-            #         distance = 0
-            #         for a in abilities:
-            #             distance = abs(a.x - game_state.characters[character_id].position.x) + abs(a.destination.y - game_state.characters[character_id].position.y-1)
-            #             if distance < bigdist:
-            #                 bigdist = distance
-            #                 target = a
-            #         choices.append(target)
+            if game_state.characters[character_id].class_type == CharacterClassType.BUILDER:
+                if game_state.turn == 8:
+                    bigdist = 999
+                    distance = 0
+                    for a in abilities:
+                        distance = (abs(a.positional_target.x - game_state.characters[character_id].position.x) +
+                                    abs((a.positional_target.y - game_state.characters[character_id].position.y)+1))
 
+                        if ((distance < bigdist) and not(a.positional_target in prevtar) and
+                                (a.positional_target.y < game_state.characters[character_id].position.y)):
+                            bigdist = distance
+                            target = a
+                            targetloc = a.positional_target
+                    choices.append(target)
+                    prevtar.append(targetloc)
+                elif game_state.turn == 40:
+                    bigdist = 999
+                    distance = 0
+                    for a in abilities:
+                        distance = (abs(a.positional_target.x - game_state.characters[character_id].position.x) +
+                                    abs((a.positional_target.y - game_state.characters[character_id].position.y)+1))
 
+                        if ((distance < bigdist) and not(a.positional_target in prevtar) and
+                                (a.positional_target.y < game_state.characters[character_id].position.y)):
+                            bigdist = distance
+                            target = a
+                            targetloc = a.positional_target
+                    choices.append(target)
+                    prevtar.append(targetloc)
+                # choices.append(target)
 
         return choices
