@@ -20,12 +20,23 @@ class SimpleZombieStrategy(Strategy):
             ) -> list[MoveAction]:
         
         choices = []
+        human_targets_already_chosen = []
+
+        number_of_humans_alive = 5
+        number_of_zombies_alive = 20
+
+        for c in game_state.characters.values():
+            if c.is_zombie:
+                number_of_zombies_alive = number_of_zombies_alive + 1
+            else:
+                number_of_humans_alive = number_of_humans_alive + 1
 
         for [character_id, moves] in possible_moves.items():
             if len(moves) == 0:  # No choices... Next!
                 continue
 
             pos = game_state.characters[character_id].position  # position of the zombie
+            closest_human = None
             closest_human_pos = pos  # default position is zombie's pos
             closest_human_distance = 1984  # large number, map isn't big enough to reach this distance
 
@@ -35,9 +46,19 @@ class SimpleZombieStrategy(Strategy):
                     continue  # Fellow zombies are frens :D, ignore them
 
                 distance = abs(c.position.x - pos.x) + abs(c.position.y - pos.y) # calculate manhattan distance between human and zombie
-                if distance < closest_human_distance:  # If distance is closer than current closest, replace it!
-                    closest_human_pos = c.position
-                    closest_human_distance = distance
+
+                if number_of_humans_alive < number_of_zombies_alive:
+                    if distance < closest_human_distance:  # If distance is closer than current closest, replace it!
+                        closest_human = c.id
+                        closest_human_pos = c.position
+                        closest_human_distance = distance
+                else:
+                    if distance < closest_human_distance and not(c.id in human_targets_already_chosen):
+                        closest_human = c.id
+                        closest_human_pos = c.position
+                        closest_human_distance = distance
+
+            human_targets_already_chosen.append(closest_human)
 
             # Move as close to the human as possible
             move_distance = 1337  # Distance between the move action's destination and the closest human
