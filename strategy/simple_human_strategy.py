@@ -27,9 +27,10 @@ class SimpleHumanStrategy(Strategy):
         # Selecting 6 Marksmen, 6 Medics, and 4 Traceurs
         # The other 4 humans will be regular class
         choices = {
-            CharacterClassType.MARKSMAN: 6,
-            CharacterClassType.MEDIC: 6,
-            CharacterClassType.TRACEUR: 4,
+            CharacterClassType.MARKSMAN: 5,
+            CharacterClassType.MEDIC: 5,
+            CharacterClassType.BUILDER: 5,
+            CharacterClassType.TRACEUR: 1,
         }
         return choices
 
@@ -61,18 +62,38 @@ class SimpleHumanStrategy(Strategy):
                     closest_zombie_distance = distance
 
             # Move as far away from the zombie as possible
-            move_distance = -1  # Distance between the move action's destination and the closest zombie
+            move_distance = 69420  # Distance between the move action's destination and the closest zombie
             move_choice = moves[0]  # The move action the human will be taking
 
-            for m in moves:
-                distance = abs(m.destination.x - closest_zombie_pos.x) + abs(m.destination.y - closest_zombie_pos.y)  # calculate manhattan distance
+            if game_state.turn < 3:
+                for m in moves:
+                    distance = abs(m.destination.x - 50) + abs(m.destination.y - 50)  # calculate manhattan distance
 
-                if distance > move_distance:  # If distance is further, that's our new choice!
-                    move_distance = distance
-                    move_choice = m
+                    if distance < move_distance:  # If distance is further, that's our new choice!
+                        move_distance = distance
+                        move_choice = m
+            elif (game_state.turn > 3) and (game_state.turn < 15):
+                for m in moves:
+                    distance = abs(m.destination.x - 50) + abs(m.destination.y - 69)  # calculate manhattan distance
 
+                    if distance < move_distance:  # If distance is further, that's our new choice!
+                        move_distance = distance
+                        move_choice = m
+            elif (game_state.turn > 15) and (game_state.turn < 33):
+                for m in moves:
+                    distance = abs(m.destination.x - 25) + abs(m.destination.y - 69)  # calculate manhattan distance
+
+                    if distance < move_distance:  # If distance is further, that's our new choice!
+                        move_distance = distance
+                        move_choice = m
+            elif (game_state.turn > 33) and (game_state.turn < 99):
+                for m in moves:
+                    distance = abs(m.destination.x - 25) + abs(m.destination.y - 83)  # calculate manhattan distance
+
+                    if distance < move_distance:  # If distance is further, that's our new choice!
+                        move_distance = distance
+                        move_choice = m
             choices.append(move_choice)  # add the choice to the list
-
         return choices
 
     def decide_attacks(
