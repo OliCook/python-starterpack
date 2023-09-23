@@ -48,8 +48,7 @@ class SimpleHumanStrategy(Strategy):
 
             pos = game_state.characters[character_id].position  # position of the human
             closest_zombie_pos = pos  # default position is zombie's pos
-            closest_zombie_distance =  1234  # large number, map isn't big enough to reach this distance
-            
+            closest_zombie_distance = 1234  # large number, map isn't big enough to reach this distance
 
             # Iterate through every zombie to find the closest one
             for c in game_state.characters.values():
@@ -64,35 +63,58 @@ class SimpleHumanStrategy(Strategy):
             # Move as far away from the zombie as possible
             move_distance = 69420  # Distance between the move action's destination and the closest zombie
             move_choice = moves[0]  # The move action the human will be taking
+            # ooga = game_state.characters[character_id].class_type
+            if game_state.characters[character_id].class_type == CharacterClassType.TRACEUR:
+                if (5 < game_state.turn) and (game_state.turn < 17):
+                    for m in moves:
+                        distance = abs(m.destination.x - 71) + abs(m.destination.y - 50)  # calculate manhattan distance
 
-            if game_state.turn < 3:
-                for m in moves:
-                    distance = abs(m.destination.x - 50) + abs(m.destination.y - 50)  # calculate manhattan distance
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
+                elif (17 < game_state.turn) and (game_state.turn < 23):
+                    for m in moves:
+                        distance = abs(m.destination.x - 80) + abs(m.destination.y - 53)  # calculate manhattan distance
 
-                    if distance < move_distance:  # If distance is further, that's our new choice!
-                        move_distance = distance
-                        move_choice = m
-            elif (game_state.turn > 3) and (game_state.turn < 15):
-                for m in moves:
-                    distance = abs(m.destination.x - 50) + abs(m.destination.y - 69)  # calculate manhattan distance
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
+                elif (23 < game_state.turn) and (game_state.turn < 50):
+                    for m in moves:
+                        distance = abs(m.destination.x - 95) + abs(m.destination.y - 49)  # calculate manhattan distance
 
-                    if distance < move_distance:  # If distance is further, that's our new choice!
-                        move_distance = distance
-                        move_choice = m
-            elif (game_state.turn > 15) and (game_state.turn < 33):
-                for m in moves:
-                    distance = abs(m.destination.x - 25) + abs(m.destination.y - 69)  # calculate manhattan distance
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
+            else:
+                if game_state.turn < 3:
+                    for m in moves:
+                        distance = abs(m.destination.x - 50) + abs(m.destination.y - 50)  # calculate manhattan distance
 
-                    if distance < move_distance:  # If distance is further, that's our new choice!
-                        move_distance = distance
-                        move_choice = m
-            elif (game_state.turn > 33) and (game_state.turn < 99):
-                for m in moves:
-                    distance = abs(m.destination.x - 25) + abs(m.destination.y - 83)  # calculate manhattan distance
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
+                elif (game_state.turn > 3) and (game_state.turn < 15):
+                    for m in moves:
+                        distance = abs(m.destination.x - 50) + abs(m.destination.y - 69)  # calculate manhattan distance
 
-                    if distance < move_distance:  # If distance is further, that's our new choice!
-                        move_distance = distance
-                        move_choice = m
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
+                elif (game_state.turn > 15) and (game_state.turn < 33):
+                    for m in moves:
+                        distance = abs(m.destination.x - 25) + abs(m.destination.y - 69)  # calculate manhattan distance
+
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
+                elif (game_state.turn > 33) and (game_state.turn < 99):
+                    for m in moves:
+                        distance = abs(m.destination.x - 25) + abs(m.destination.y - 99)  # calculate manhattan distance
+
+                        if distance < move_distance:  # If distance is further, that's our new choice!
+                            move_distance = distance
+                            move_choice = m
             choices.append(move_choice)  # add the choice to the list
         return choices
 
@@ -137,19 +159,31 @@ class SimpleHumanStrategy(Strategy):
         for [character_id, abilities] in possible_abilities.items():
             if len(abilities) == 0:  # No choices? Next!
                 continue
+            if game_state.characters[character_id].class_type == CharacterClassType.MEDIC:
+                # Since we only have medics, the choices must only be healing a nearby human
+                human_target = abilities[0]  # the human that'll be healed
+                least_health = 999  # The health of the human being targeted
 
-            # Since we only have medics, the choices must only be healing a nearby human
-            human_target = abilities[0]  # the human that'll be healed
-            least_health = 999  # The health of the human being targeted
+                for a in abilities:
+                    health = game_state.characters[a.character_id_target].health  # Health of human in question
 
-            for a in abilities:
-                health = game_state.characters[a.character_id_target].health  # Health of human in question
+                    if health < least_health:  # If they have less health, they are the new patient!
+                        human_target = a
+                        least_health = health
 
-                if health < least_health:  # If they have less health, they are the new patient!
-                    human_target = a
-                    least_health = health
+                if human_target:  # Give the human a cookie
+                    choices.append(human_target)
+            # if game_state.characters[character_id].class_type == CharacterClassType.BUILDER:
+            #     if game_state.turn == 8:
+            #         bigdist = 999
+            #         distance = 0
+            #         for a in abilities:
+            #             distance = abs(a.x - game_state.characters[character_id].position.x) + abs(a.destination.y - game_state.characters[character_id].position.y-1)
+            #             if distance < bigdist:
+            #                 bigdist = distance
+            #                 target = a
+            #         choices.append(target)
 
-            if human_target:  # Give the human a cookie
-                choices.append(human_target)
-        
+
+
         return choices

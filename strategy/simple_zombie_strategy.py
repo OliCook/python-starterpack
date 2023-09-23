@@ -43,7 +43,7 @@ class SimpleZombieStrategy(Strategy):
             move_distance = 1337  # Distance between the move action's destination and the closest human
             move_choice = moves[0]  # The move action the zombie will be taking
             for m in moves:
-                distance = abs(m.destination.x - 100) + abs(m.destination.y - 100)  # calculate manhattan distance
+                distance = abs(m.destination.x - closest_human_pos.x) + abs(m.destination.y - closest_human_pos.y)  # calculate manhattan distance
 
                 # If distance is closer, that's our new choice!
                 if distance < move_distance:  
